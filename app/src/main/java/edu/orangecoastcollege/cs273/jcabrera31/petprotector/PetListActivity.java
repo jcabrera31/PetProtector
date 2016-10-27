@@ -23,6 +23,7 @@ import java.util.ArrayList;
 public class PetListActivity extends AppCompatActivity {
 
     private ImageView petImageView;
+    private final static int REQUEST_CODE =100;
 
     // This memeber variable stores the URI to wheatever image has been selected
     // Default: none.png (R.drawable.none)
@@ -66,14 +67,14 @@ public class PetListActivity extends AppCompatActivity {
         permList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         //if the list has items (size >0) we need to repeat permission form the user:
-        int requestCode =100;
+
         if(permList.size() > 0)
         {
             //convert the ArrayList (permList) into an array of strings
             String[] perms = new String[permList.size()];
             //request permissions from the user:
 
-            ActivityCompat.requestPermissions(this, permList.toArray(perms), requestCode);
+            ActivityCompat.requestPermissions(this, permList.toArray(perms), REQUEST_CODE);
 
         }
 
@@ -82,17 +83,36 @@ public class PetListActivity extends AppCompatActivity {
                 && writeExternalStoragePermission == PackageManager.PERMISSION_GRANTED)
         {
             //User an Intent to launch the gallery and take pictures
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, requestCode);
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, REQUEST_CODE);
+
 
         }
         else
         {
             Toast.makeText(this,
-                    "Pet Protector requires camera and edteran store permission",
+                    "Pet Protector requires camera and external store permission",
                     Toast.LENGTH_LONG);
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // code to handle when the user closes the image gallery by selecting and image
+        //or pressing the back button
+
+        // The Intent data is the URI selected form the image gallery
+        //Decide if the user selected and image:
+        if(data != null && requestCode == REQUEST_CODE && resultCode == RESULT_OK)
+        {
+            //set the ImageURI to the data
+            imageURI = data.getData();
+            petImageView.setImageURI(imageURI);
+        }
     }
 
     /**
